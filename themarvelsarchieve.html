@@ -1,0 +1,1754 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#ED1D24" />
+  <title>The Marvel's Archive</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" referrerpolicy="no-referrer"/>
+
+  <style>
+    :root{
+      --red:#ED1D24;
+      --white:#fff;
+      --gold:#D4AF37;
+      --bg:#0F0F0F;
+      --ok:#00FF00;
+      --danger:#ff3b30;
+
+      --shadow: 0 8px 32px rgba(237,29,36,0.40);
+      --shadowSoft: 0 10px 40px rgba(0,0,0,0.45);
+      --radius: 18px;
+
+      --ease: cubic-bezier(.2,.85,.25,1);
+      --t: 200ms var(--ease);
+
+      --cols: 3;
+      --gap: 16px;
+      --topbarH: 76px;
+    }
+
+    @media (max-width:1024px){ :root{ --cols:2; } }
+    @media (max-width:767px){ :root{ --cols:1; --gap:14px; --topbarH: 106px; } }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 15% -10%, rgba(237,29,36,0.25), transparent 55%),
+        radial-gradient(900px 600px at 90% 0%, rgba(212,175,55,0.10), transparent 55%),
+        radial-gradient(1000px 700px at 50% 110%, rgba(237,29,36,0.14), transparent 60%),
+        var(--bg);
+      color:var(--white);
+      overflow:hidden; /* la pagina non scrolla: scrolla la view */
+    }
+    a, button{ color:inherit; }
+    button, input, textarea, select{ font:inherit; }
+    ::selection{ background: rgba(237,29,36,.5); }
+
+    /* ---------- TOP BAR ---------- */
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      height: var(--topbarH);
+      z-index:50;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.94), rgba(10,10,10,0.62));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .topbar-inner{
+      max-width:1200px;
+      margin:0 auto;
+      height:100%;
+      padding: 10px 16px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 240px;
+      user-select:none;
+      line-height:1;
+    }
+    .brand .title{
+      font-family:"Bebas Neue", sans-serif;
+      letter-spacing:1px;
+      font-size: clamp(22px, 2.6vw, 30px);
+      color:var(--red);
+      text-shadow: 0 12px 34px rgba(237,29,36,0.38);
+      white-space:nowrap;
+    }
+    .brand .tag{
+      font-size:12px;
+      color:rgba(255,255,255,0.75);
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+
+    .nav{
+      margin-left:auto;
+      display:flex;
+      align-items:stretch;
+      gap: 8px;
+    }
+    .tabbtn{
+      height:50px;
+      padding: 0 16px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      transition: transform var(--t), box-shadow var(--t), background var(--t), border-color var(--t);
+      touch-action: manipulation;
+      position:relative;
+      overflow:hidden;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .tabbtn .ico{ opacity:.9; }
+    .tabbtn::after{
+      content:"";
+      position:absolute;
+      left:14px;
+      right:14px;
+      bottom:8px;
+      height:3px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.12);
+      transform: scaleX(0.25);
+      transform-origin:left;
+      transition: transform 240ms var(--ease), background 240ms var(--ease);
+    }
+    .tabbtn:hover{ transform: translateY(-1px); }
+    .tabbtn:active{ transform: translateY(0); }
+    .tabbtn[aria-selected="true"]{
+      border-color: rgba(237,29,36,0.60);
+      background: rgba(237,29,36,0.12);
+      box-shadow: 0 10px 30px rgba(237,29,36,0.22);
+    }
+    .tabbtn[aria-selected="true"]::after{
+      background: rgba(237,29,36,0.95);
+      transform: scaleX(1);
+      filter: drop-shadow(0 0 12px rgba(237,29,36,0.40));
+    }
+    .tabbtn[aria-selected="true"] .ico{ color: var(--red); }
+
+    @media (max-width:767px){
+      .topbar-inner{
+        flex-direction:column;
+        align-items:stretch;
+        justify-content:center;
+        gap:10px;
+        padding: 10px 12px;
+      }
+      .brand{
+        min-width: 0;
+        align-items:flex-start;
+      }
+      .brand .title{
+        font-size: 28px;
+        white-space:normal;
+      }
+      .brand .tag{ white-space:normal; }
+      .nav{
+        margin-left:0;
+        width:100%;
+      }
+      .tabbtn{
+        flex:1 1 0;
+        justify-content:center;
+        height:48px;
+        border-radius: 16px;
+      }
+    }
+
+    /* ---------- APP LAYOUT ---------- */
+    .app{
+      position:relative;
+      height:100%;
+      padding-top: var(--topbarH);
+      overflow:hidden;
+    }
+
+    /* La view scrolla */
+    .view{
+      height: calc(100vh - var(--topbarH));
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      display:none;
+      scrollbar-color: rgba(255,255,255,0.25) transparent;
+    }
+    .view::-webkit-scrollbar{ width:10px; }
+    .view::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,0.18);
+      border-radius: 999px;
+    }
+    .view.active{ display:block; }
+
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      min-height:100%;
+      padding: 18px 16px 24px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      overflow:visible;
+    }
+    @media (max-width:767px){
+      .container{ padding: 14px 12px 18px; }
+    }
+
+    /* ---------- HERO ---------- */
+    .hero{
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadowSoft);
+      padding: 18px 18px 12px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-80px -60px auto auto;
+      width:260px; height:260px;
+      background: radial-gradient(circle at 30% 30%, rgba(237,29,36,0.5), transparent 60%);
+      filter: blur(20px);
+      opacity:0.65;
+      pointer-events:none;
+    }
+    .heroTitle{
+      font-family:"Bebas Neue", sans-serif;
+      font-size: clamp(40px, 5vw, 64px);
+      color: var(--red);
+      letter-spacing: 1.2px;
+      text-shadow: 0 12px 32px rgba(237,29,36,0.4);
+      margin:0;
+      line-height: 0.95;
+    }
+    .heroSub{
+      margin:6px 0 0;
+      color: rgba(255,255,255,0.78);
+      font-size:14px;
+      max-width: 72ch;
+    }
+
+    .heroRow{
+      margin-top: 14px;
+      display:flex;
+      gap:14px;
+      align-items:stretch;
+      flex-wrap:wrap;
+    }
+    .kpi{
+      flex: 1 1 220px;
+      min-width: 220px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.22);
+      padding: 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .kpiTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .kpiLabel{
+      font-size:12px;
+      color: rgba(255,255,255,0.70);
+      letter-spacing:.2px;
+    }
+    .kpiValue{
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .bar{
+      height:10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow:hidden;
+      position:relative;
+    }
+    .bar > span{
+      display:block;
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(237,29,36,0.95), rgba(212,175,55,0.55));
+      box-shadow: 0 10px 30px rgba(237,29,36,0.3);
+      transition: width 420ms var(--ease);
+    }
+
+    .timelineWrap{
+      margin-top: 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.18);
+      overflow:hidden;
+    }
+    .timelineHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .timelineHeader .left{
+      display:flex; gap:10px; align-items:center;
+      min-width:0;
+    }
+    .timelineHeader .left b{ font-size:13px; letter-spacing:.2px; }
+    .timelineHeader .left span{
+      font-size:12px;
+      color: rgba(255,255,255,0.70);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 60vw;
+    }
+    .timelineScroll{
+      overflow-x:auto;
+      overflow-y:hidden;
+      padding: 12px 12px 14px;
+      scrollbar-color: rgba(255,255,255,0.25) transparent;
+    }
+    .timelineScroll::-webkit-scrollbar{ height:10px; }
+    .timelineScroll::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,0.18);
+      border-radius: 999px;
+    }
+    .timelineSvg{
+      min-width: 940px;
+      width: 100%;
+      height: 72px;
+      display:block;
+    }
+
+    /* ---------- CONTROLS ---------- */
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .searchBar{
+      flex: 1 1 360px;
+      min-width: 260px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .searchBar i{ color: rgba(255,255,255,0.70); }
+    .searchBar input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      color:var(--white);
+      font-size:14px;
+    }
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .chip{
+      height:40px;
+      padding: 0 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      transition: transform var(--t), box-shadow var(--t), border-color var(--t), background var(--t);
+      user-select:none;
+      touch-action: manipulation;
+    }
+    .chip:hover{ transform: translateY(-1px); }
+    .chip[data-on="true"]{
+      border-color: rgba(237,29,36,0.55);
+      background: rgba(237,29,36,0.12);
+      box-shadow: 0 10px 30px rgba(237,29,36,0.20);
+    }
+    .chip small{ color: rgba(255,255,255,0.70); font-size:12px; }
+
+    /* ---------- SCROLL AREA (NON SCROLLA PIU') ---------- */
+    .scrollArea{
+      flex: 0 0 auto;
+      min-height: auto;
+      overflow: visible;
+      padding-bottom: 18px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+      gap: var(--gap);
+      padding: 2px 2px 18px;
+    }
+
+    /* ---------- CARD ---------- */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      transform: translateZ(0);
+      transition: transform var(--t), box-shadow var(--t), border-color var(--t);
+      position:relative;
+      min-height: 320px;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(237,29,36,0.32);
+      border-color: rgba(237,29,36,0.25);
+    }
+
+    .cardHead{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .meta{ min-width:0; }
+    .cardTitle{
+      margin:0;
+      font-size:18px;
+      font-weight: 900;
+      letter-spacing:.2px;
+    }
+    .badgeRow{
+      margin-top:8px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .badge{
+      font-size:11px;
+      padding: 4px 9px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.82);
+    }
+    .badge.phase{
+      border-color: rgba(237,29,36,0.35);
+      background: rgba(237,29,36,0.10);
+    }
+    .badge.type{
+      border-color: rgba(212,175,55,0.35);
+      background: rgba(212,175,55,0.08);
+    }
+    .desc{
+      margin: 10px 0 0;
+      color: rgba(255,255,255,0.78);
+      font-size: 13px;
+      line-height: 1.35;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    .cardBody{
+      padding: 0 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .watchedRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .watchToggle{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .check{
+      width:24px; height:24px;
+      border-radius:7px;
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      display:grid;
+      place-items:center;
+      transition: border-color var(--t), background var(--t), box-shadow var(--t);
+      flex:0 0 auto;
+    }
+    .check i{ opacity:0; transform: scale(.9); transition: opacity var(--t), transform var(--t); }
+    .watchToggle[data-on="true"] .check{
+      border-color: rgba(0,255,0,0.55);
+      background: rgba(0,255,0,0.12);
+      box-shadow: 0 10px 22px rgba(0,255,0,0.14);
+    }
+    .watchToggle[data-on="true"] .check i{
+      opacity:1;
+      transform: scale(1);
+      color: var(--ok);
+    }
+    .watchToggle span{
+      font-size:13px;
+      color: rgba(255,255,255,0.86);
+      font-weight:700;
+    }
+
+    .ratingWrap{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .ratingLabel{
+      font-size:12px;
+      color: rgba(255,255,255,0.70);
+      white-space:nowrap;
+    }
+    .stars{
+      display:flex;
+      gap:4px;
+      align-items:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .starBtn{
+      position:relative;
+      width: 20px;
+      height: 20px;
+      border:none;
+      background: transparent;
+      padding:0;
+      cursor:pointer;
+      touch-action: manipulation;
+      outline-offset: 4px;
+    }
+    .starBtn i{
+      font-size: 16px;
+      line-height: 20px;
+      display:block;
+      color: rgba(255,255,255,0.28);
+      filter: drop-shadow(0 0 0 rgba(212,175,55,0));
+      transition: transform var(--t), filter var(--t), color var(--t);
+    }
+    .starBtn:hover i{
+      transform: scale(1.06);
+      filter: drop-shadow(0 0 10px rgba(212,175,55,0.35));
+    }
+    .starFill{
+      position:absolute;
+      left:0; top:0;
+      height:100%;
+      width:0%;
+      overflow:hidden;
+      pointer-events:none;
+    }
+    .starFill i{
+      color: var(--gold);
+      filter: drop-shadow(0 0 10px rgba(212,175,55,0.25));
+    }
+    .ratingValue{
+      font-size:12px;
+      color: rgba(255,255,255,0.75);
+      min-width: 62px;
+      text-align:right;
+      font-weight:700;
+    }
+
+    @keyframes sparkle {
+      0% { transform: translateY(0) scale(.6); opacity:0; }
+      20%{ opacity:1; }
+      100% { transform: translateY(-18px) scale(1.05); opacity:0; }
+    }
+    .sparkle{
+      position:absolute;
+      width:8px; height:8px;
+      border-radius: 999px;
+      background: rgba(212,175,55,0.95);
+      box-shadow: 0 0 16px rgba(212,175,55,0.55);
+      animation: sparkle 520ms var(--ease) forwards;
+      pointer-events:none;
+      z-index:10;
+    }
+
+    /* ---------- NOTES ---------- */
+    .notes{
+      width:100%;
+      resize:none;
+      min-height: 90px;
+      max-height: 160px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      color: rgba(255,255,255,0.92);
+      outline:none;
+      transition: border-color var(--t), box-shadow var(--t);
+      font-size: 16px;
+      line-height: 1.35;
+    }
+    .notes:focus{
+      border-color: rgba(237,29,36,0.45);
+      box-shadow: 0 10px 30px rgba(237,29,36,0.18);
+    }
+    .notesMeta{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      font-size:12px;
+      color: rgba(255,255,255,0.70);
+    }
+    .notesMeta .count.over{ color: var(--danger); font-weight:800; }
+
+    .empty{
+      padding: 26px 18px;
+      border-radius: var(--radius);
+      border:1px dashed rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.03);
+      text-align:center;
+      color: rgba(255,255,255,0.78);
+      margin: 10px 2px 18px;
+    }
+    .empty b{ color: var(--white); }
+
+    /* ---------- DIARY FILTERS ---------- */
+    .diaryTop{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:center;
+      justify-content:flex-start; /* ora solo search */
+    }
+    .filters{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    select, .miniInput{
+      height:44px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.92);
+      padding: 0 12px;
+      outline:none;
+      font-size: 16px;
+    }
+    .miniInput{ width: 320px; max-width: 100%; }
+
+    /* ---------- CONFETTI ---------- */
+    .confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index: 100;
+      display:none;
+    }
+    .confetti.show{ display:block; }
+    .confetti i{
+      position:absolute;
+      top:-12px;
+      width:10px; height:14px;
+      border-radius: 2px;
+      background: var(--red);
+      opacity:0.9;
+      animation: fall 1200ms linear forwards;
+      filter: drop-shadow(0 0 10px rgba(237,29,36,0.25));
+    }
+    @keyframes fall{
+      to { transform: translateY(110vh) rotate(720deg); opacity:0.9; }
+    }
+
+    .srOnly{
+      position:absolute !important;
+      width:1px; height:1px;
+      padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0,0,0,0);
+      white-space:nowrap; border:0;
+    }
+  </style>
+</head>
+
+<body>
+<!-- LOGIN OVERLAY -->
+<section id="loginScreen" style="
+  position:fixed; inset:0; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(10px);
+">
+  <div style="
+    width:min(420px, 92vw);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(15,15,15,0.85);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    padding:18px;
+  ">
+    <h2 style="margin:0 0 8px; font-family:'Bebas Neue', sans-serif; letter-spacing:1px; color:#ED1D24;">
+      Login
+    </h2>
+    <p style="margin:0 0 14px; color:rgba(255,255,255,0.75); font-size:14px;">
+      Identity check: prove you’re not a variant.
+    </p>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <input id="email" type="email" placeholder="Email" style="
+        height:44px; border-radius:14px; padding:0 12px;
+        border:1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.04);
+        color: white; outline:none;
+      "/>
+
+      <input id="password" type="password" placeholder="Password" style="
+        height:44px; border-radius:14px; padding:0 12px;
+        border:1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.04);
+        color: white; outline:none;
+      "/>
+
+      <div style="display:flex; gap:10px; margin-top:6px;">
+        <button onclick="register()" style="
+          flex:1; height:44px; border-radius:14px;
+          border:1px solid rgba(237,29,36,0.60);
+          background: rgba(237,29,36,0.18);
+          font-weight:800; cursor:pointer;
+        ">New Entry</button>
+
+        <button onclick="login()" style="
+          flex:1; height:44px; border-radius:14px;
+          border:1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.06);
+          font-weight:800; cursor:pointer;
+        ">Access</button>
+      </div>
+
+      <div id="authMsg" style="min-height:18px; margin-top:6px; font-size:12px; color:rgba(255,255,255,0.75);"></div>
+    </div>
+  </div>
+</section>
+
+  <div class="topbar" role="navigation" aria-label="Primary">
+    <div class="topbar-inner">
+      <div class="brand" aria-label="The Marvel's Archive">
+        <div class="title">THE MARVEL'S ARCHIVE</div>
+        <div class="tag">Personal MCU Diary</div>
+      </div>
+
+      <div class="nav" role="tablist" aria-label="Views">
+        <button class="tabbtn" id="tabDash" role="tab" aria-selected="true" aria-controls="viewDashboard">
+          <i class="fa-solid fa-grid-2 ico" aria-hidden="true"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="tabbtn" id="tabDiary" role="tab" aria-selected="false" aria-controls="viewDiary">
+          <i class="fa-solid fa-book-open ico" aria-hidden="true"></i>
+          <span>Diary</span>
+        </button>
+<button class="tabbtn" onclick="logout()" aria-label="Logout">
+  <i class="fa-solid fa-right-from-bracket ico"></i>
+  <span>Logout</span>
+</button>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="app" id="app" style="display:none;">
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="viewDashboard" role="tabpanel" aria-labelledby="tabDash">
+      <div class="container">
+        <div class="hero" role="region" aria-label="Overview">
+          <h1 class="heroTitle">The Marvel's Archive</h1>
+          <p class="heroSub">
+            Master the MCU timeline. Log every watch, rate it, and save your thoughts.
+            <span class="srOnly">Keyboard accessible: tab through controls; use arrow keys on ratings.</span>
+          </p>
+
+          <div class="heroRow">
+            <div class="kpi" aria-label="Progress">
+              <div class="kpiTop">
+                <div class="kpiLabel">Global Progress</div>
+                <div class="kpiValue" id="kpiProgress">0% watched</div>
+              </div>
+              <div class="bar" aria-label="Watched progress bar"><span id="progressBar"></span></div>
+              <div class="kpiLabel" id="kpiProgressSub">Assemble your MCU journey!</div>
+            </div>
+
+            <div class="kpi" aria-label="Average rating">
+              <div class="kpiTop">
+                <div class="kpiLabel">Average Rating</div>
+                <div class="kpiValue" id="kpiAvg">—</div>
+              </div>
+              <div class="kpiLabel" id="kpiAvgSub">Rate anything you’ve watched.</div>
+            </div>
+
+            <div class="kpi" aria-label="Stats">
+              <div class="kpiTop">
+                <div class="kpiLabel">Stats</div>
+                <div class="kpiValue" id="kpiStats">—</div>
+              </div>
+              <div class="kpiLabel" id="kpiStatsSub">Movies/Series breakdown, extremes, and phase completions.</div>
+            </div>
+          </div>
+
+          <div class="timelineWrap" role="region" aria-label="Timeline">
+            <div class="timelineHeader">
+              <div class="left">
+                <b>Timeline</b>
+                <span id="timelineHint">Phase markers show your watched progress.</span>
+              </div>
+              <div class="kpiLabel" id="phaseCompleteHint">Phases complete: 0</div>
+            </div>
+            <div class="timelineScroll" id="timelineScroll">
+              <svg class="timelineSvg" id="timelineSvg" viewBox="0 0 1000 72" role="img" aria-label="Phase timeline"></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls" role="region" aria-label="Search and quick filters">
+          <div class="searchBar" role="search">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input id="dashSearch" type="text" placeholder="Search titles, phases, or notes…" aria-label="Search titles phases notes">
+          </div>
+
+          <div class="chips" role="group" aria-label="Quick filters">
+            <div class="chip" id="chipWatched" data-on="false" role="button" tabindex="0" aria-pressed="false">
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+              <span>Watched</span>
+              <small id="chipWatchedCount">0</small>
+            </div>
+            <div class="chip" id="chipUnwatched" data-on="false" role="button" tabindex="0" aria-pressed="false">
+              <i class="fa-regular fa-circle" aria-hidden="true"></i>
+              <span>Unwatched</span>
+              <small id="chipUnwatchedCount">0</small>
+            </div>
+            <div class="chip" id="chipRated" data-on="false" role="button" tabindex="0" aria-pressed="false">
+              <i class="fa-solid fa-star" aria-hidden="true"></i>
+              <span>Rated</span>
+              <small id="chipRatedCount">0</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="scrollArea" id="dashScroll" role="region" aria-label="Chronological titles grid">
+          <div class="grid" id="dashGrid"></div>
+          <div class="empty" id="dashEmpty" style="display:none;">
+            <b>Assemble your MCU journey!</b><br>
+            No titles match your filters. Try clearing search or toggles.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIARY -->
+    <section class="view" id="viewDiary" role="tabpanel" aria-labelledby="tabDiary">
+      <div class="container">
+        <div class="hero" role="region" aria-label="Diary header">
+          <h1 class="heroTitle" style="font-size: clamp(34px, 4.4vw, 54px);">Personal Diary</h1>
+          <p class="heroSub">
+            Here you can find the titles you have <b>Watched</b> and <b>Rated</b>.
+          </p>
+
+          <div class="diaryTop">
+            <div class="filters" role="group" aria-label="Diary filters">
+              <input class="miniInput" id="diarySearch" type="text" placeholder="Search diary…" aria-label="Diary search">
+            </div>
+          </div>
+        </div>
+
+        <div class="scrollArea" id="diaryScroll" role="region" aria-label="Diary cards">
+          <div class="grid" id="diaryGrid"></div>
+          <div class="empty" id="diaryEmpty" style="display:none;">
+            <b>Nothing here (yet)!</b><br>
+            Mark titles as <b>Watched</b> and rate them in the Dashboard to see them here.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+  </div>
+
+  <script>
+    /***********************************************************************
+     * The Marvel's Archive
+     * Single-file, vanilla JS. Local storage.
+     ***********************************************************************/
+
+    const MCU_TITLES = [
+      // Phase 1
+      { id:"iron-man-2008", title:"Iron Man", releaseYear:2008, type:"Movie", phase:"Phase 1", description:"Tony Stark builds his first Iron Man suit." },
+      { id:"the-incredible-hulk-2008", title:"The Incredible Hulk", releaseYear:2008, type:"Movie", phase:"Phase 1", description:"Bruce Banner's origin as the Hulk." },
+      { id:"iron-man-2-2010", title:"Iron Man 2", releaseYear:2010, type:"Movie", phase:"Phase 1", description:"Tony faces government pressure and a new rival." },
+      { id:"thor-2011", title:"Thor", releaseYear:2011, type:"Movie", phase:"Phase 1", description:"God of Thunder banished to Earth." },
+      { id:"captain-america-the-first-avenger-2011", title:"Captain America: The First Avenger", releaseYear:2011, type:"Movie", phase:"Phase 1", description:"Steve Rogers becomes the super soldier." },
+      { id:"the-avengers-2012", title:"The Avengers", releaseYear:2012, type:"Movie", phase:"Phase 1", description:"Earth's mightiest heroes unite against Loki." },
+
+      // Phase 2
+      { id:"iron-man-3-2013", title:"Iron Man 3", releaseYear:2013, type:"Movie", phase:"Phase 2", description:"Tony battles PTSD and the Mandarin." },
+      { id:"thor-the-dark-world-2013", title:"Thor: The Dark World", releaseYear:2013, type:"Movie", phase:"Phase 2", description:"Realm Eternal faces the Dark Elves." },
+      { id:"captain-america-the-winter-soldier-2014", title:"Captain America: The Winter Soldier", releaseYear:2014, type:"Movie", phase:"Phase 2", description:"SHIELD's corruption and Bucky's return." },
+      { id:"guardians-of-the-galaxy-2014", title:"Guardians of the Galaxy", releaseYear:2014, type:"Movie", phase:"Phase 2", description:"Misfit space heroes steal the Orb." },
+      { id:"avengers-age-of-ultron-2015", title:"Avengers: Age of Ultron", releaseYear:2015, type:"Movie", phase:"Phase 2", description:"Team fights rogue AI created by Tony." },
+      { id:"ant-man-2015", title:"Ant-Man", releaseYear:2015, type:"Movie", phase:"Phase 2", description:"Scott Lang shrinks to hero size." },
+
+      // Phase 3
+      { id:"captain-america-civil-war-2016", title:"Captain America: Civil War", releaseYear:2016, type:"Movie", phase:"Phase 3", description:"Avengers divide over oversight." },
+      { id:"black-widow-2021", title:"Black Widow", releaseYear:2021, type:"Movie", phase:"Phase 3", description:"Natasha's pre-Endgame spy thriller." },
+      { id:"spider-man-homecoming-2017", title:"Spider-Man: Homecoming", releaseYear:2017, type:"Movie", phase:"Phase 3", description:"Peter Parker mentors under Tony." },
+      { id:"black-panther-2018", title:"Black Panther", releaseYear:2018, type:"Movie", phase:"Phase 3", description:"Wakanda's throne challenged." },
+      { id:"doctor-strange-2016", title:"Doctor Strange", releaseYear:2016, type:"Movie", phase:"Phase 3", description:"Surgeon masters mystic arts." },
+      { id:"thor-ragnarok-2017", title:"Thor: Ragnarok", releaseYear:2017, type:"Movie", phase:"Phase 3", description:"Asgard destroyed by Hela." },
+      { id:"ant-man-and-the-wasp-2018", title:"Ant-Man and the Wasp", releaseYear:2018, type:"Movie", phase:"Phase 3", description:"Quantum Realm heist." },
+      { id:"avengers-infinity-war-2018", title:"Avengers: Infinity War", releaseYear:2018, type:"Movie", phase:"Phase 3", description:"Thanos snaps half of life." },
+      { id:"avengers-endgame-2019", title:"Avengers: Endgame", releaseYear:2019, type:"Movie", phase:"Phase 3", description:"Heroes reverse the Decimation." },
+
+      // Phase 4
+      { id:"wandavision-2021", title:"WandaVision", releaseYear:2021, type:"Series", phase:"Phase 4", description:"Wanda's sitcom grief in Westview." },
+      { id:"the-falcon-and-the-winter-soldier-2021", title:"The Falcon and The Winter Soldier", releaseYear:2021, type:"Series", phase:"Phase 4", description:"Sam takes the shield." },
+      { id:"spider-man-no-way-home-2021", title:"Spider-Man: No Way Home", releaseYear:2021, type:"Movie", phase:"Phase 4", description:"Multiverse spell chaos." },
+      { id:"loki-season-1-2021", title:"Loki Season 1", releaseYear:2021, type:"Series", phase:"Phase 4", description:"Variant Loki joins TVA." },
+      { id:"what-if-season-1-2021", title:"What If...? Season 1", releaseYear:2021, type:"Series", phase:"Phase 4", description:"Animated multiverse tales." },
+      { id:"hawkeye-2021", title:"Hawkeye", releaseYear:2021, type:"Series", phase:"Phase 4", description:"Clint mentors Kate Bishop." },
+      { id:"moon-knight-2022", title:"Moon Knight", releaseYear:2022, type:"Series", phase:"Phase 4", description:"Marc Spector's Egyptian god." },
+      { id:"black-panther-wakanda-forever-2022", title:"Black Panther: Wakanda Forever", releaseYear:2022, type:"Movie", phase:"Phase 4", description:"Shuri faces Namor." },
+      { id:"ms-marvel-2022", title:"Ms. Marvel", releaseYear:2022, type:"Series", phase:"Phase 4", description:"Kamala Khan gains powers." },
+      { id:"thor-love-and-thunder-2022", title:"Thor: Love and Thunder", releaseYear:2022, type:"Movie", phase:"Phase 4", description:"God of Thunder vs. Gorr." },
+      { id:"she-hulk-attorney-at-law-2022", title:"She-Hulk: Attorney at Law", releaseYear:2022, type:"Series", phase:"Phase 4", description:"Jennifer Walters breaks the fourth wall." },
+      { id:"werewolf-by-night-2022", title:"Werewolf by Night", releaseYear:2022, type:"Special", phase:"Phase 4", description:"Monster hunters in a special presentation." },
+
+      // Phase 5
+      { id:"the-guardians-of-the-galaxy-holiday-special-2022", title:"The Guardians of the Galaxy Holiday Special", releaseYear:2022, type:"Special", phase:"Phase 5", description:"Guardians' Christmas rescue." },
+      { id:"ant-man-and-the-wasp-quantumania-2023", title:"Ant-Man and the Wasp: Quantumania", releaseYear:2023, type:"Movie", phase:"Phase 5", description:"Kang emerges from Quantum Realm." },
+      { id:"guardians-of-the-galaxy-vol-3-2023", title:"Guardians of the Galaxy Vol. 3", releaseYear:2023, type:"Movie", phase:"Phase 5", description:"Rocket's origin and team finale." },
+      { id:"secret-invasion-2023", title:"Secret Invasion", releaseYear:2023, type:"Series", phase:"Phase 5", description:"Skrulls infiltrate Earth." },
+      { id:"loki-season-2-2023", title:"Loki Season 2", releaseYear:2023, type:"Series", phase:"Phase 5", description:"TVA time unraveling." },
+      { id:"the-marvels-2023", title:"The Marvels", releaseYear:2023, type:"Movie", phase:"Phase 5", description:"Carol, Monica, and Kamala swap powers." },
+      { id:"what-if-season-2-2023", title:"What If...? Season 2", releaseYear:2023, type:"Series", phase:"Phase 5", description:"More animated multiverse stories." },
+      { id:"echo-2024", title:"Echo", releaseYear:2024, type:"Series", phase:"Phase 5", description:"Maya Lopez's street-level vengeance." },
+      { id:"deadpool-and-wolverine-2024", title:"Deadpool & Wolverine", releaseYear:2024, type:"Movie", phase:"Phase 5", description:"Merc with a mouth joins MCU multiverse." },
+      { id:"agatha-all-along-2024", title:"Agatha All Along", releaseYear:2024, type:"Series", phase:"Phase 5", description:"Witch's coven on the Witches' Road." },
+
+      // Phase 6
+      { id:"captain-america-brave-new-world-2025", title:"Captain America: Brave New World", releaseYear:2025, type:"Movie", phase:"Phase 6", description:"Sam Wilson as new Cap." },
+      { id:"thunderbolts-2025", title:"Thunderbolts", releaseYear:2025, type:"Movie", phase:"Phase 6", description:"Anti-heroes assemble." },
+      { id:"the-fantastic-four-first-steps-2025", title:"The Fantastic Four: First Steps", releaseYear:2025, type:"Movie", phase:"Phase 6", description:"Reed Richards' team in retro-futuristic world." },
+      { id:"spider-man-4-2026", title:"Spider-Man 4", releaseYear:2026, type:"Movie", phase:"Phase 6", description:"Peter's next chapter post-No Way Home." },
+      { id:"daredevil-born-again-2025", title:"Daredevil: Born Again", releaseYear:2025, type:"Series", phase:"Phase 6", description:"Matt Murdock vs. Kingpin redux." },
+      { id:"ironheart-2025", title:"Ironheart", releaseYear:2025, type:"Series", phase:"Phase 6", description:"Riri Williams builds her legacy." },
+      { id:"wonder-man-2025", title:"Wonder Man", releaseYear:2025, type:"Series", phase:"Phase 6", description:"Simon Williams' Hollywood heroism." }
+    ];
+
+    const STORAGE_KEY = "marvelArchive.v2";
+    const LEGACY_KEY = "marvelArchive.v1";
+    const LEGACY_KEY_OLD = "mcuArchive.v0";
+
+    const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+    const roundToHalf = (n) => Math.round(n * 2) / 2;
+
+    function defaultEntry(){
+      return { watched:false, rating:null, notes:"", updatedAt: Date.now() };
+    }
+
+    function loadState(){
+      const rawV2 = localStorage.getItem(STORAGE_KEY);
+      const rawV1 = localStorage.getItem(LEGACY_KEY);
+      const rawV0 = localStorage.getItem(LEGACY_KEY_OLD);
+
+      let state = { version:2, progress:{} };
+
+      if (rawV2){
+        try{
+          const parsed = JSON.parse(rawV2);
+          if (parsed && typeof parsed === "object") state = parsed;
+        }catch(_){}
+      } else if (rawV1 || rawV0){
+        const raw = rawV1 || rawV0;
+        try{
+          const legacy = JSON.parse(raw);
+          if (legacy && legacy.progress && typeof legacy.progress === "object"){
+            for (const item of MCU_TITLES){
+              const old = legacy.progress[item.id];
+              if (old){
+                state.progress[item.id] = {
+                  watched: !!old.watched,
+                  rating: (old.rating === null || old.rating === undefined) ? null : clamp(roundToHalf(Number(old.rating)), 0, 10),
+                  notes: (old.notes || "").toString().slice(0, 500),
+                  updatedAt: Date.now()
+                };
+              }
+            }
+          }
+        }catch(_){}
+      }
+
+      if (!state.progress) state.progress = {};
+      for (const item of MCU_TITLES){
+        if (!state.progress[item.id]) state.progress[item.id] = defaultEntry();
+        const e = state.progress[item.id];
+
+        e.watched = !!e.watched;
+        e.notes = (e.notes || "").toString().slice(0, 500);
+
+        if (e.rating === "" || e.rating === undefined) e.rating = null;
+        if (e.rating !== null){
+          const r = Number(e.rating);
+          e.rating = Number.isFinite(r) ? clamp(roundToHalf(r), 0, 10) : null;
+        }
+
+        // coerenza: rated solo se watched
+        if (!e.watched) e.rating = null;
+
+        if (!e.updatedAt) e.updatedAt = Date.now();
+      }
+      state.version = 2;
+      return state;
+    }
+
+ async function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+
+  try{
+    const fb = window.__fb;
+    if (!fb?.auth?.currentUser) return;
+
+    const u = fb.auth.currentUser;
+    const ref = fb.doc(fb.db, "users", u.uid, "state", "appState");
+    await fb.setDoc(ref, appState, { merge:true });
+  }catch(e){
+    console.log("Cloud save error:", e);
+  }
+}
+
+   var appState = loadState();
+
+
+    const $ = (q, el=document) => el.querySelector(q);
+
+    const tabDash = $("#tabDash");
+    const tabDiary = $("#tabDiary");
+    const viewDashboard = $("#viewDashboard");
+    const viewDiary = $("#viewDiary");
+
+    // la view scrolla
+    const dashScroll = viewDashboard;
+    const diaryScroll = viewDiary;
+
+    const dashSearch = $("#dashSearch");
+    const chipWatched = $("#chipWatched");
+    const chipUnwatched = $("#chipUnwatched");
+    const chipRated = $("#chipRated");
+
+    const chipWatchedCount = $("#chipWatchedCount");
+    const chipUnwatchedCount = $("#chipUnwatchedCount");
+    const chipRatedCount = $("#chipRatedCount");
+
+    const kpiProgress = $("#kpiProgress");
+    const kpiProgressSub = $("#kpiProgressSub");
+    const progressBar = $("#progressBar");
+    const kpiAvg = $("#kpiAvg");
+    const kpiAvgSub = $("#kpiAvgSub");
+    const kpiStats = $("#kpiStats");
+    const kpiStatsSub = $("#kpiStatsSub");
+
+    const phaseCompleteHint = $("#phaseCompleteHint");
+    const timelineSvg = $("#timelineSvg");
+
+    const dashGrid = $("#dashGrid");
+    const dashEmpty = $("#dashEmpty");
+
+    const diarySearch = $("#diarySearch");
+    const diaryGrid = $("#diaryGrid");
+    const diaryEmpty = $("#diaryEmpty");
+
+    const confetti = $("#confetti");
+
+    function setActiveTab(which){
+      const map = [
+        { tab: tabDash, view: viewDashboard, key:"dash" },
+        { tab: tabDiary, view: viewDiary, key:"diary" }
+      ];
+      for (const it of map){
+        const on = it.key === which;
+        it.tab.setAttribute("aria-selected", on ? "true" : "false");
+        it.view.classList.toggle("active", on);
+      }
+      if (which === "dash") dashSearch.focus({ preventScroll:true });
+      if (which === "diary") diarySearch.focus({ preventScroll:true });
+    }
+    tabDash.addEventListener("click", () => setActiveTab("dash"));
+    tabDiary.addEventListener("click", () => setActiveTab("diary"));
+
+    for (const t of [tabDash, tabDiary]){
+      t.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft"){
+          e.preventDefault();
+          const arr = [tabDash, tabDiary];
+          let idx = arr.indexOf(document.activeElement);
+          if (idx < 0) idx = 0;
+          idx += (e.key === "ArrowRight") ? 1 : -1;
+          idx = (idx + arr.length) % arr.length;
+          arr[idx].focus();
+          arr[idx].click();
+        }
+      });
+    }
+
+    function debounce(fn, ms=250){
+      let t = null;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+
+    const dashFilters = { search:"", watched:false, unwatched:false, rated:false };
+    const diaryFilters = { search:"" }; // ✅ phase rimosso
+
+    function normalize(s){ return (s || "").toString().toLowerCase().trim(); }
+
+    function dashMatches(item){
+      const st = appState.progress[item.id];
+      const search = dashFilters.search;
+      if (search){
+        const hay = (item.title + " " + item.phase + " " + (st.notes || "")).toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+
+      const isWatched = !!st.watched;
+      const isRated = st.watched && st.rating !== null;
+
+      const any = dashFilters.watched || dashFilters.unwatched || dashFilters.rated;
+      if (!any) return true;
+
+      if (dashFilters.watched && isWatched) return true;
+      if (dashFilters.unwatched && !isWatched) return true;
+      if (dashFilters.rated && isRated) return true;
+      return false;
+    }
+
+    // Diary: SOLO watched + rated + search
+    function diaryMatches(item){
+      const st = appState.progress[item.id];
+      if (!st.watched) return false;
+      if (st.rating === null) return false;
+
+      const search = diaryFilters.search;
+      if (search){
+        const hay = (item.title + " " + item.phase + " " + item.type + " " + (st.notes || "")).toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+      return true;
+    }
+
+    function computeStats(){
+      const total = MCU_TITLES.length;
+      let watched = 0;
+      let ratedCount = 0;
+      let ratedSum = 0;
+      let moviesWatched = 0;
+      let seriesWatched = 0;
+      let specialWatched = 0;
+      let highest = null;
+      let lowest = null;
+
+      const phaseMap = new Map();
+      for (const item of MCU_TITLES){
+        if (!phaseMap.has(item.phase)) phaseMap.set(item.phase, { total:0, watched:0 });
+        phaseMap.get(item.phase).total++;
+
+        const st = appState.progress[item.id];
+        if (st.watched){
+          watched++;
+          phaseMap.get(item.phase).watched++;
+          if (item.type === "Movie") moviesWatched++;
+          else if (item.type === "Series") seriesWatched++;
+          else specialWatched++;
+
+          if (st.rating !== null){
+            ratedCount++;
+            ratedSum += st.rating;
+            if (!highest || st.rating > highest.rating) highest = { title:item.title, rating:st.rating };
+            if (!lowest || st.rating < lowest.rating) lowest = { title:item.title, rating:st.rating };
+          }
+        }
+      }
+
+      const pct = total ? Math.round((watched / total) * 1000) / 10 : 0;
+      const avg = ratedCount ? (ratedSum / ratedCount) : null;
+
+      let phasesComplete = 0;
+      for (const v of phaseMap.values()){
+        if (v.total > 0 && v.watched === v.total) phasesComplete++;
+      }
+
+      return { total, watched, pct, ratedCount, avg, moviesWatched, seriesWatched, specialWatched, highest, lowest, phasesComplete, phaseMap };
+    }
+
+    function renderTimeline(stats){
+      const phases = ["Phase 1","Phase 2","Phase 3","Phase 4","Phase 5","Phase 6"];
+      const W = 1000;
+      const left = 60, right = 60;
+      const y = 36;
+      const spacing = (W - left - right) / (phases.length - 1);
+
+      let svg = "";
+      svg += `<defs>
+        <linearGradient id="lineGrad" x1="0" x2="1">
+          <stop offset="0" stop-color="rgba(237,29,36,0.95)"></stop>
+          <stop offset="1" stop-color="rgba(212,175,55,0.55)"></stop>
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2.3" result="coloredBlur"></feGaussianBlur>
+          <feMerge><feMergeNode in="coloredBlur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+        </filter>
+      </defs>`;
+
+      svg += `<line x1="${left}" y1="${y}" x2="${W-right}" y2="${y}" stroke="rgba(255,255,255,0.14)" stroke-width="6" stroke-linecap="round"></line>`;
+
+      for (let i=0;i<phases.length-1;i++){
+        const a = stats.phaseMap.get(phases[i]) || {total:0, watched:0};
+        const b = stats.phaseMap.get(phases[i+1]) || {total:0, watched:0};
+        const r = ((a.total ? a.watched/a.total : 0) + (b.total ? b.watched/b.total : 0)) / 2;
+        const x1 = left + spacing*i;
+        const x2 = left + spacing*(i+1);
+        svg += `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="url(#lineGrad)" stroke-opacity="${0.25 + 0.70*r}" stroke-width="6" stroke-linecap="round"></line>`;
+      }
+
+      for (let i=0;i<phases.length;i++){
+        const v = stats.phaseMap.get(phases[i]) || {total:0, watched:0};
+        const ratio = v.total ? v.watched/v.total : 0;
+        const x = left + spacing*i;
+        const fill = ratio > 0 ? `rgba(237,29,36,${0.25 + 0.70*ratio})` : `rgba(255,255,255,0.06)`;
+        const inner = ratio >= 1 ? `rgba(0,255,0,0.45)` : `rgba(212,175,55,${0.10 + 0.55*ratio})`;
+        svg += `<g filter="url(#glow)">
+          <circle cx="${x}" cy="${y}" r="14" fill="${fill}" stroke="rgba(255,255,255,0.20)" stroke-width="2"></circle>
+          <circle cx="${x}" cy="${y}" r="9" fill="${inner}" stroke="rgba(0,0,0,0.25)" stroke-width="1"></circle>
+          <text x="${x}" y="${y+30}" text-anchor="middle" font-family="Roboto" font-size="11" fill="rgba(255,255,255,0.75)">${phases[i].replace("Phase ","P")}</text>
+        </g>`;
+      }
+
+      svg += `<path d="M ${W-right} ${y} L ${W-right-18} ${y-10} L ${W-right-18} ${y+10} Z" fill="rgba(255,255,255,0.18)"></path>`;
+      timelineSvg.innerHTML = svg;
+    }
+
+    function escapeHtml(s){
+      return (s || "").toString()
+        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+    function escapeAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
+
+    function renderStars(id, rating, title){
+      const r = (rating === null) ? 0 : rating;
+      const stars = [];
+      for (let i=1;i<=10;i++){
+        const fullAt = i;
+        const halfAt = i - 0.5;
+        let fillPct = 0;
+        if (r >= fullAt) fillPct = 100;
+        else if (r >= halfAt) fillPct = 50;
+
+        stars.push(`
+          <button class="starBtn" type="button"
+            aria-label="Rate ${escapeAttr(title)} star ${i} (half supported)"
+            data-action="rate" data-id="${escapeAttr(id)}" data-star="${i}">
+            <i class="fa-regular fa-star" aria-hidden="true"></i>
+            <span class="starFill" style="width:${fillPct}%"><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+          </button>
+        `);
+      }
+      return `<div class="stars" role="radiogroup" aria-label="Rating for ${escapeAttr(title)}" data-role="stars" data-id="${escapeAttr(id)}">${stars.join("")}</div>`;
+    }
+
+    function makeCard(item){
+      const st = appState.progress[item.id];
+
+      const head = `
+        <div class="cardHead">
+          <div class="meta">
+            <h3 class="cardTitle">${escapeHtml(item.title)}</h3>
+            <div class="badgeRow">
+              <span class="badge phase">${escapeHtml(item.phase)}</span>
+              <span class="badge type">${escapeHtml(item.type)}</span>
+              <span class="badge">${item.releaseYear}</span>
+            </div>
+            <p class="desc">${escapeHtml(item.description)}</p>
+          </div>
+        </div>
+      `;
+
+      const watchedRow = `
+        <div class="watchedRow">
+          <div class="watchToggle" data-on="${st.watched ? "true":"false"}" role="checkbox"
+               aria-checked="${st.watched ? "true":"false"}" tabindex="0"
+               aria-label="Watched toggle for ${escapeAttr(item.title)}"
+               data-action="toggleWatched" data-id="${escapeAttr(item.id)}">
+            <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+            <span>Watched</span>
+          </div>
+          <div class="ratingValue">${st.rating === null ? "—" : st.rating.toFixed(1)+"/10"}</div>
+        </div>
+      `;
+
+      const rating = renderStars(item.id, st.rating, item.title);
+
+      const notes = `
+        <textarea class="notes" maxlength="500"
+          aria-label="Notes for ${escapeAttr(item.title)}"
+          placeholder="Your epic thoughts here!"
+          data-action="notes" data-id="${escapeAttr(item.id)}">${escapeHtml(st.notes || "")}</textarea>
+        <div class="notesMeta">
+          <span class="count" data-role="count" data-id="${escapeAttr(item.id)}">${(st.notes||"").length}/500</span>
+  </div>
+`;
+
+      return `<div class="card" id="card-${escapeAttr(item.id)}">${head}<div class="cardBody">${watchedRow}<div class="ratingWrap"><div class="ratingLabel">Rate (0–10)</div>${rating}</div>${notes}</div></div>`;
+    }
+
+    function buildDashList(){ return MCU_TITLES.filter(dashMatches); }
+    function buildDiaryList(){ return MCU_TITLES.filter(diaryMatches); } // cronologico
+
+    function updateCountForNotes(id){
+      const st = appState.progress[id];
+      const nodes = document.querySelectorAll(`[data-role="count"][data-id="${CSS.escape(id)}"]`);
+      for (const n of nodes){
+        const len = (st.notes || "").length;
+        n.textContent = `${len}/500`;
+        n.classList.toggle("over", len > 500);
+      }
+    }
+
+    function updateWatchedUI(id){
+      const st = appState.progress[id];
+      const nodes = document.querySelectorAll(`[data-action="toggleWatched"][data-id="${CSS.escape(id)}"]`);
+      for (const n of nodes){
+        n.dataset.on = st.watched ? "true" : "false";
+        n.setAttribute("aria-checked", st.watched ? "true" : "false");
+      }
+    }
+
+    function updateRatingUI(id){
+      const st = appState.progress[id];
+      const rating = st.rating;
+
+      const starGroups = document.querySelectorAll(`[data-role="stars"][data-id="${CSS.escape(id)}"]`);
+      for (const g of starGroups){
+        const btns = g.querySelectorAll(".starBtn");
+        for (const btn of btns){
+          const star = Number(btn.dataset.star);
+          let pct = 0;
+          if (rating === null) pct = 0;
+          else if (rating >= star) pct = 100;
+          else if (rating >= star - 0.5) pct = 50;
+          const fill = btn.querySelector(".starFill");
+          if (fill) fill.style.width = pct + "%";
+        }
+      }
+
+      const card = document.querySelector(`#card-${CSS.escape(id)}`);
+      if (card){
+        const v = card.querySelector(".ratingValue");
+        if (v) v.textContent = (rating === null) ? "—" : rating.toFixed(1)+"/10";
+      }
+    }
+
+    function sparkleAt(el){
+      const rect = el.getBoundingClientRect();
+      const s = document.createElement("div");
+      s.className = "sparkle";
+      s.style.left = (rect.left + rect.width*0.5 + (Math.random()*10-5)) + "px";
+      s.style.top = (rect.top + rect.height*0.2 + (Math.random()*8-4)) + "px";
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 700);
+    }
+
+    function pointerToHalfRating(btn, clientX){
+      const rect = btn.getBoundingClientRect();
+      const rel = (clientX - rect.left) / rect.width;
+      const star = Number(btn.dataset.star);
+      const val = (rel <= 0.5) ? (star - 0.5) : star;
+      return clamp(roundToHalf(val), 0, 10);
+    }
+
+    function handleToggleWatched(id){
+      const st = appState.progress[id];
+      const goingWatched = !st.watched;
+
+      if (goingWatched){
+        if (st.rating === null){
+          const ok = confirm("Don't be a variant—pick a score! \nDefault to 5.0? (Change it via stars instantly).");
+          if (!ok) return;
+          st.rating = 5.0;
+        }
+        st.watched = true;
+      } else {
+        st.watched = false;
+        st.rating = null;
+      }
+
+      st.updatedAt = Date.now();
+      saveState();
+
+      updateWatchedUI(id);
+      updateRatingUI(id);
+
+      updateStatsAndHeader();
+      refreshLists({ keepScroll:true });
+      maybeConfetti();
+      renderTimeline(computeStats());
+    }
+
+    function handleNotes(id, value){
+      const st = appState.progress[id];
+      st.notes = (value || "").toString().slice(0, 500);
+      st.updatedAt = Date.now();
+      saveState();
+      updateCountForNotes(id);
+    }
+
+    function handleRate(id, btn, clientX){
+      const st = appState.progress[id];
+
+      if (!st.watched){
+        const ok = confirm("Can't rate a timeline you haven't seen!\nEnable Watched status and continue?");
+        if (!ok) return;
+        st.watched = true;
+      }
+
+      const next = pointerToHalfRating(btn, clientX);
+      st.rating = next;
+      st.updatedAt = Date.now();
+      saveState();
+
+      sparkleAt(btn);
+      updateRatingUI(id);
+      updateWatchedUI(id);
+
+      updateStatsAndHeader();
+      refreshListsDebounced({ keepScroll:true });
+      maybeConfetti();
+      renderTimeline(computeStats());
+    }
+
+    function adjustRatingByKey(id, dir){
+      const st = appState.progress[id];
+
+      if (!st.watched){
+        st.watched = true;
+        if (st.rating === null) st.rating = 5.0;
+      }
+
+      const cur = (st.rating === null) ? 0 : st.rating;
+      const next = clamp(roundToHalf(cur + (dir * 0.5)), 0, 10);
+      st.rating = next;
+      st.updatedAt = Date.now();
+      saveState();
+
+      updateRatingUI(id);
+      updateWatchedUI(id);
+      updateStatsAndHeader();
+      refreshListsDebounced({ keepScroll:true });
+    }
+
+    function delegateEvents(root){
+      root.addEventListener("click", (e) => {
+        const a = e.target.closest("[data-action]");
+        if (!a) return;
+
+        const action = a.dataset.action;
+        const id = a.dataset.id;
+
+        if (action === "toggleWatched") handleToggleWatched(id);
+        else if (action === "rate"){
+          const btn = a.closest(".starBtn");
+          if (!btn) return;
+          const x = (e.clientX || (btn.getBoundingClientRect().left + btn.getBoundingClientRect().width/2));
+          handleRate(id, btn, x);
+        }
+      });
+
+   root.addEventListener("pointerleave", (e) => {
+  const group = e.target.closest ? e.target.closest('[data-role="stars"]') : null;
+  if (!group) return;
+  updateRatingUI(group.dataset.id);
+});
+
+
+      root.addEventListener("pointerleave", (e) => {
+        const group = e.target.closest ? e.target.closest('[data-role="stars"]') : null;
+        if (!group) return;
+        updateRatingUI(group.dataset.id);
+      });
+
+      root.addEventListener("input", (e) => {
+        const ta = e.target.closest("textarea[data-action='notes']");
+        if (!ta) return;
+        handleNotes(ta.dataset.id, ta.value);
+      });
+
+      root.addEventListener("keydown", (e) => {
+        const t = e.target.closest("[data-action]");
+        if (!t) return;
+
+        const action = t.dataset.action;
+
+        if ((e.key === "Enter" || e.key === " ") && action === "toggleWatched"){
+          e.preventDefault();
+          handleToggleWatched(t.dataset.id);
+        }
+
+        if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && t.closest && t.closest(".stars")){
+          e.preventDefault();
+          const dir = (e.key === "ArrowRight") ? 1 : -1;
+          const group = t.closest(".stars");
+          const gid = group?.dataset?.id;
+          if (gid) adjustRatingByKey(gid, dir);
+        }
+      });
+    }
+    delegateEvents(document);
+
+    function toggleChip(el, key){
+      const next = !(el.dataset.on === "true");
+      el.dataset.on = next ? "true" : "false";
+      el.setAttribute("aria-pressed", next ? "true" : "false");
+      dashFilters[key] = next;
+      refreshLists({ keepScroll:true });
+    }
+    function chipKeydown(el, key){
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " "){ e.preventDefault(); toggleChip(el, key); }
+      });
+    }
+    chipWatched.addEventListener("click", () => toggleChip(chipWatched, "watched"));
+    chipUnwatched.addEventListener("click", () => toggleChip(chipUnwatched, "unwatched"));
+    chipRated.addEventListener("click", () => toggleChip(chipRated, "rated"));
+    chipKeydown(chipWatched, "watched");
+    chipKeydown(chipUnwatched, "unwatched");
+    chipKeydown(chipRated, "rated");
+
+    dashSearch.addEventListener("input", debounce(() => {
+      dashFilters.search = normalize(dashSearch.value);
+      refreshLists({ keepScroll:true });
+    }, 250));
+
+    diarySearch.addEventListener("input", debounce(() => {
+      diaryFilters.search = normalize(diarySearch.value);
+      refreshLists({ keepScroll:true });
+    }, 250));
+
+    function updateStatsAndHeader(){
+      const stats = computeStats();
+
+      kpiProgress.textContent = `${stats.pct}% watched`;
+      kpiProgressSub.textContent = `${stats.pct}% of ${stats.total} MCU titles watched`;
+      progressBar.style.width = (stats.total ? (stats.watched / stats.total) * 100 : 0) + "%";
+
+      if (stats.ratedCount > 0 && stats.avg !== null){
+        kpiAvg.textContent = `${stats.avg.toFixed(1)}/10`;
+        kpiAvgSub.textContent = `from ${stats.ratedCount} rated`;
+      } else {
+        kpiAvg.textContent = "—";
+        kpiAvgSub.textContent = "Rate anything you’ve watched.";
+      }
+
+      const parts = [];
+      parts.push(`${stats.moviesWatched} Movies`);
+      parts.push(`${stats.seriesWatched} Series`);
+      if (stats.specialWatched > 0) parts.push(`${stats.specialWatched} Specials`);
+      kpiStats.textContent = parts.join(" • ");
+
+      const hi = stats.highest ? `Highest: ${stats.highest.title} (${stats.highest.rating.toFixed(1)})` : "Highest: —";
+      const lo = stats.lowest ? `Lowest: ${stats.lowest.title} (${stats.lowest.rating.toFixed(1)})` : "Lowest: —";
+      kpiStatsSub.textContent = `${hi} · ${lo} · Phases 100%: ${stats.phasesComplete}`;
+
+      phaseCompleteHint.textContent = `Phases complete: ${stats.phasesComplete}`;
+
+      chipWatchedCount.textContent = stats.watched;
+      chipUnwatchedCount.textContent = stats.total - stats.watched;
+      chipRatedCount.textContent = stats.ratedCount;
+
+      return stats;
+    }
+
+    function refreshLists({ keepScroll=false } = {}){
+      const dashTop = dashScroll.scrollTop;
+      const diaryTop = diaryScroll.scrollTop;
+
+      const dashList = buildDashList();
+      const diaryList = buildDiaryList();
+
+      dashGrid.innerHTML = dashList.map(makeCard).join("");
+      diaryGrid.innerHTML = diaryList.map(makeCard).join("");
+
+      dashEmpty.style.display = dashList.length ? "none" : "block";
+      diaryEmpty.style.display = diaryList.length ? "none" : "block";
+
+      if (keepScroll){
+        dashScroll.scrollTop = dashTop;
+        diaryScroll.scrollTop = diaryTop;
+      }
+    }
+    const refreshListsDebounced = debounce((opts) => refreshLists(opts), 250);
+
+    let confettiShown = false;
+    function maybeConfetti(){
+      const stats = computeStats();
+      if (stats.total > 0 && stats.watched === stats.total && !confettiShown){
+        confettiShown = true;
+        launchConfetti();
+      }
+      if (stats.watched < stats.total) confettiShown = false;
+    }
+    function launchConfetti(){
+      confetti.innerHTML = "";
+      const count = 90;
+      const colors = ["rgba(237,29,36,0.95)","rgba(212,175,55,0.95)","rgba(255,255,255,0.90)","rgba(0,255,0,0.75)"];
+      for (let i=0;i<count;i++){
+        const p = document.createElement("i");
+        p.style.left = (Math.random()*100) + "vw";
+        p.style.animationDelay = (Math.random()*250) + "ms";
+        p.style.animationDuration = (900 + Math.random()*800) + "ms";
+        p.style.width = (6 + Math.random()*8) + "px";
+        p.style.height = (10 + Math.random()*10) + "px";
+        p.style.background = colors[Math.floor(Math.random()*colors.length)];
+        p.style.transform = `translateY(-10px) rotate(${Math.random()*180}deg)`;
+        confetti.appendChild(p);
+      }
+      confetti.classList.add("show");
+      setTimeout(() => confetti.classList.remove("show"), 1600);
+    }
+
+    function init(){
+      const stats = updateStatsAndHeader();
+      renderTimeline(stats);
+      refreshLists();
+      maybeConfetti();
+    }
+    init();
+  </script>
+<script type="module">
+  import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+const firebaseConfig = {
+apiKey: "__GOOGLE_API_KEY__",
+  authDomain: "the-marvel-s-archieve.firebaseapp.com",
+  projectId: "the-marvel-s-archieve",
+  storageBucket: "the-marvel-s-archieve.firebasestorage.app",
+  messagingSenderId: "5534520167",
+  appId: "1:5534520167:web:82cc4df65ffa6c68a795c2"
+};
+
+  const appFirebase = initializeApp(firebaseConfig);
+  const auth = getAuth(appFirebase);
+const db = getFirestore(appFirebase);
+
+window.__fb = { auth, db, doc, getDoc, setDoc };
+
+  const loginScreen = document.getElementById("loginScreen");
+  const appBox = document.getElementById("app");
+  const msg = document.getElementById("authMsg");
+
+  window.register = async () => {
+    try {
+      await createUserWithEmailAndPassword(auth, email.value, password.value);
+    } catch (e) {
+      msg.textContent = e.message;
+    }
+  };
+
+  window.login = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email.value, password.value);
+    } catch (e) {
+      msg.textContent = e.message;
+    }
+  };
+
+window.logout = async () => {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    loginScreen.style.display = "none";
+    appBox.style.display = "block";
+
+const ref = doc(db, "users", user.uid, "state", "appState");
+const snap = await getDoc(ref);
+
+if (snap.exists()) {
+  appState = snap.data();
+  localStorage.setItem("marvelArchive.v2", JSON.stringify(appState));
+  init();
+} else {
+  await setDoc(ref, appState, { merge: true });
+  localStorage.setItem("marvelArchive.v2", JSON.stringify(appState));
+  init();
+}
+
+
+  } else {
+    loginScreen.style.display = "flex";
+    appBox.style.display = "none";
+  }
+});
+
+</script>
+</body>
+</html>
